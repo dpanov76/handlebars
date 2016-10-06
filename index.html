@@ -1,0 +1,270 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Handlebars</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="handlebars-v4.0.5.js" type="text/javascript"></script>
+    <script src="groceries.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="myData"></div>
+    <div id="myRadio"></div>
+    <div id="nestedData"></div>
+    <div id="partials"></div>
+    <div id="groceryDiv"></div>
+<!--
+    <script id="grocery-template" type="text/x-handlebars-template">
+
+    <h2>Groceries</h2>
+
+    {{#each groceries}}
+      <ul class="grocary-item">
+        <li>Item: {{this.item}}</li>
+      </ul>
+    {{/each}}
+
+    </script>
+-->
+    <script type="text/javascript">
+
+      //For commented template
+
+      //var groceryInfo = document.getElementById("grocery-template").innerHTML;
+      //var groceryTemplate = Handlebars.compile(groceryInfo);
+
+
+      //For precompiled template
+      var groceryTemplate = Handlebars.templates['groceries'];
+
+      var groceryContext = {
+        groceries:[
+          {item: "Potato"},
+          {item: "Flour"},
+          {item: "Yogurt"},
+          {item: "Beans"}
+        ]
+      };
+
+      var templateGroceryData = groceryTemplate(groceryContext);
+
+      document.getElementById("groceryDiv").innerHTML += templateGroceryData;
+
+    </script>
+
+    <script id="partials-template" type="text/x-handlebars-template">
+      {{>myName}}
+      <div class="post">
+        {{> askQuestion tagName="h2"}}
+        <h2>Suggestions</h2>
+        {{#each comments}}
+          {{> askQuestion tagName="h3"}}
+        {{/each}}
+      </div>
+
+    </script>
+
+    <script type="text/javascript">
+
+    var templatePartialsInfo = document.getElementById("partials-template").innerHTML;
+    var templatePartials = Handlebars.compile(templatePartialsInfo);
+
+    Handlebars.registerPartial("myName", '{{name}}');
+    Handlebars.registerPartial("askQuestion", '<{{tagName}}>{{author}}</tagName>' + '<div class="comment">{{comment}}</div>');
+
+    var templatePartialsData = templatePartials({
+      name:"Dmitry",
+      author:"Panov",
+      comment:"Hi I am Dmitry Panov's comment",
+      comments:[{
+        comment: "Comment 1",
+        author: "Sue smith"
+      },{
+        comment: "Comment 2",
+        author: "John smith"
+      }]
+    });
+
+    document.getElementById("partials").innerHTML += templatePartialsData;
+
+    </script>
+
+    <script id="nested-data-template" type="text/x-handlebars-template">
+      
+      <div class="potter-1">
+        <h3>{{title}}</h3>
+        {{#with techData}}
+          <div class="isbn">{{isbn}}</div>
+          <div class="author">{{author}}</div>
+        {{/with}}
+      </div>
+
+    </script>
+
+    <script type="text/javascript">
+      var templateNestedInfo = document.getElementById("nested-data-template").innerHTML;
+      var templateNested = Handlebars.compile(templateNestedInfo);
+
+      Handlebars.registerHelper('with', function(context, options){
+        return options.fn(context);
+      })
+
+      var templateNestedData = templateNested({
+        title:"Harry potter",
+        techData:{
+          isbn:"0-754-34898-3",
+          author:"J.K.Rowling"
+        }
+      })
+
+      document.getElementById('nestedData').innerHTML += templateNestedData;
+
+    </script>
+
+    <script id="the-template" type="text/x-handlebars-template">
+      
+    {{#makeRadio "size"}}
+      Small
+      Medium
+      Large
+    {{/makeRadio}}
+
+    {{#areEqual 1 12}}
+      Numbers are equal
+    {{else}}
+      Numbers are different
+    {{/areEqual}}
+
+    {{#if "isActived"}}
+      <p>Active Template 1</p>
+    {{else}}
+      <p><strong>Not Template 2</strong></p>
+    {{/if}}
+
+    </script>
+
+    <script type="text/javascript">
+      var templateInfo = document.getElementById("the-template").innerHTML;
+      var template2 = Handlebars.compile(templateInfo);
+
+      Handlebars.registerHelper("makeRadio", function(name, options){
+        var radioList = options.fn();
+
+        radioList = radioList.trim().split("\n");
+
+        var output ="";
+
+        for(var val in radioList){
+          var item = radioList[val].trim();
+          output += '<p><input type="radio" name="' + name + '"value="' + item + '">' + item + '</p>'
+        }
+
+        return output;
+
+      });
+
+      Handlebars.registerHelper("areEqual", function(num1, num2, options){
+        if (num1 === num2){
+          return options.fn(this);
+        } else {
+          return options.inverse(this);
+        }
+      })
+
+      Handlebars.registerHelper("if", function(data, options){
+        if (data === "isActive"){
+          return options.fn(this);
+        } else {
+          return options.inverse(this);
+        }
+      })
+
+      template2Data = template2({});
+
+      document.getElementById("myRadio").innerHTML += template2Data; 
+
+
+    </script>
+
+    <script id="quote-template" type="text/x-handlebars-template">
+      
+      <h3>Favorite {{name}} quotes</h3>
+      <ol>
+      {{#each quotes}}
+      <li>{{quote}}</li>
+      {{/each}}
+      </ol>
+
+      {{{ dmitryBio }}}
+
+      {{makeLink "Dmitry Panov Website" "http://yoursites.org"}}
+
+      {{changeColor "Make my text red" color="green" }}
+
+      {{sayHello}}
+
+    </script>
+
+    <script type="text/javascript">
+
+    console.log(Handlebars);
+
+      var quoteInfo = document.getElementById("quote-template").innerHTML;
+      var template = Handlebars.compile(quoteInfo);
+
+      Handlebars.registerHelper("changeColor", function(text, options){
+        text = Handlebars.Utils.escapeExpression(text);
+
+        if(options.hash.color === "red"){
+          return new Handlebars.SafeString("<p><span class='red-text'>" + text + "</span></p>");
+        } else if (options.hash.color === "blue"){
+          return new Handlebars.SafeString("<p><span class='blue-text'>" + text + "</span></p>");
+        } else {
+          return new Handlebars.SafeString("<p><span class='green-text'>" + text + "</span></p>");
+        }
+
+      });
+
+      Handlebars.registerHelper("makeLink", function(text, url){
+
+        text = Handlebars.Utils.escapeExpression(text);
+        url = Handlebars.Utils.escapeExpression(url);
+
+        var theLink = '<p><a href="' + url + '">' + text + '</a></p>';
+
+        return new Handlebars.SafeString(theLink);
+
+      });
+
+      Handlebars.registerHelper("sayHello", function(options){
+
+        switch(options.data.lang){
+          case "russian":
+            return "Привет";
+            break;
+          case "english":
+            return "Hello";
+            break;
+          default:
+            return "Hello Default";         
+        }
+
+      });          
+
+      var quoteData = template({
+        name: "Dmitry Panov",
+        quotes:[
+          {quote: "Hello world!"},
+          {quote: "Здравствуй Мир!"}
+        ],
+        dmitryBio : "<p><i>Good man!!!</i></p>"
+      }, {data:{
+        lang:"english"
+        }
+    });
+
+      document.getElementById("myData").innerHTML += quoteData;
+
+    </script>
+
+  </body>
+</html>
